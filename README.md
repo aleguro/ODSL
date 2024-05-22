@@ -1,13 +1,19 @@
-# Ruby DSL
+# Object DSL
 
-This is just a proto type to write code in a DSL declarative syntax stlye, for the time being is only meant to be for educational purpose and is not meant to be use professionally.
+This is a prototype oriented to use OOP and a functional programming approach by providing a DSL to decouple coding logic from coding while enforcing inmutability.
 
-# How It would look like
+  - It also provides ways to create complex objects using factory patterns.
+  - Aim to improve coding by running any code as an aspect.
+
+# Sample code
 
 ```
 class CreateGameBoard < Rdsl:Dsl
   include Game
   include Players
+
+  inmutable: true
+  background: true
 
   main do
 
