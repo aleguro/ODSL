@@ -1,76 +1,75 @@
 # Object DSL
 
-This is a prototype oriented to use OOP and a functional programming approach by providing a DSL to decouple coding logic from coding while enforcing inmutability.
+This is a prototype oriented to use OOP and a functional programming approach by providing a DSL to decouple code logic from coding itself while enforcing good practices and providing:
 
-  - It also provides ways to create complex objects using factory patterns.
-  - Aim to improve coding by running any code as an aspect.
+    - Design patterns
+    - Inmutability
+    - Dry off
+    - Decouple aspects from code ( background, paralelization )
 
-# Sample code
+# Your code
 
 ```
-class CreateGameBoard < Rdsl:Dsl
-  include Game
-  include Players
-
-  inmutable: true
-  background: true
-
-  main do
-
-    with(:args)
-      .set(:actors)
-      .get(:player, :game)
-
-    with(:player, :game, :args)
-      .create(:board)
-      .get(:id)
-
-    finish_with(:id)
-  end
-
-  private
-
-  def actors(args)
-    
-    # TODO: Add your business code to get a player and a game instances
-   
-    [ player, 
-      game ]
-  end
-
-  def board(player, game, args)
-
-    id = create_new_game_board 
-
-    [ id ]
+module Game
+  def start(game_type)
+    @game = Struct.new(game_type: game_type, player: @player.name)
+    self
   end
 end
-```
+
+module Player
+  def with_player(player)
+    @player = Struct.new(name: player)
+    self
+  end
+end
+
+module Game
+  module Crud     
+    def create
+      build(Game, Players)
+        .get(:game_object)
+
+      with(:args, :game_object)
+        .set(:new_game)
+        .get(:game_instance)
+
+      finish_with(:game_instance) 
+    end
+
+    def delete(id)
+    end
+
+    private
+
+    def new_game(args, game_object)
+
+      game_object
+        .with_player(args[:player])
+        .start(args[:game_name])  
+    end    
+  end
+end
   
-## Future implementations
+module Game
+  class Service < Odsl:Dsl
+    include Crud
 
-# Generic background processing
-
-```
-background do
-
-  # Your code
-
+    inmutable true 
+  end
 end
 ```
 
-# Parallel execution
+# How to use call it.
 
 ```
-parallelize do
-
-  # block A
-  run do
-  end
-
-  # block B
-  run do
-  end
-
-end
+Games::Service
+  .new(player: { name: 'alejandro' } , game: 'chez')
+  .run(:create)
 ```
+
+
+# Future development
+
+ .run_in_background() 
+ .run_in_parallel()
