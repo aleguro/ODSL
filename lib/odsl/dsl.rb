@@ -11,6 +11,7 @@ module Odsl
 
     def initialize(**kwargs)
 
+      @delegated       = self
       @kwargs          = kwargs
       @context         = {}
       @last_results    = []
@@ -33,6 +34,20 @@ module Odsl
   
     protected
 
+    def instantiate(object, public: false)
+
+      resolved_attrs = with_attributes_resolver
+
+      @last_results = [ ] << if resolved_attrs.any?
+
+        resolved_attrs.is_a?(Array) ? object.new(*resolved_attrs) : object.new(**resolved_attrs)
+      else
+        object.new
+      end     
+
+      self
+    end
+
     def build(*modules)
       @last_results = [ Odsl::Builder.build(*modules).new ]
       self
@@ -43,7 +58,7 @@ module Odsl
       self
     end
   
-    def value_return(with)
+    def value_return(*with)
       @finish_with = with
     end
      
