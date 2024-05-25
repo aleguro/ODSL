@@ -1,10 +1,17 @@
 module Odsl
   module Methods
+
+    def use(object)
+      @delegated = instance_variable_get("@#{object}")
+
+      self
+    end
+
     def call(methodo)
-      
-      @last_results = send(methodo, *@with_attributes.map { |attribute| instance_variable_get("@#{attribute}") })
-      @last_results = [@last_results] unless @last_results.is_a? Array
-  
+
+      run_method(methodo)
+      restore_delegate
+
       self
     end
   
@@ -14,6 +21,21 @@ module Odsl
       end
   
       self
+    end
+
+    private
+
+    def run_method(methodo)
+      @last_results = @delegated.send(methodo, *with_attributes_resolver)
+      @last_results = [ @last_results ] unless @last_results.is_a? Array
+    end
+
+    def restore_delegate
+      @delegated = self
+    end
+
+    def with_attributes_resolver
+      @with_attributes.map { |attribute| instance_variable_get("@#{attribute}") }
     end
   end
 end

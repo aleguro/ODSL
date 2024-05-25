@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   - Inmutability
   - Dry off
   - Decouple aspects from code ( background, paralelization )."
-  spec.homepage = "https://github.com/aleguro/ODSL."
+  spec.homepage = "https://github.com/aleguro/ODSL"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
 

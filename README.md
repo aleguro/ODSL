@@ -10,6 +10,17 @@ This is a prototype oriented to use OOP and a functional programming approach by
 # Your code
 
 ```
+class ScoreBoard
+
+  def initialize(game_object)
+    @game, @player = game_object.game, game_object.player
+  end
+
+  def publish
+    STDOUT.puts "Player: @player.name is playing: #{@game.game_type}"
+  end
+end
+
 module Game
   def start(game_type)
     @game = Struct.new(game_type: game_type, player: @player.name)
@@ -26,13 +37,20 @@ end
 
 module Game
   module Crud     
-    def create
+    def create    
       build(Game, Players)
         .get(:game_object)
 
       with(:args, :game_object)
         .set(:new_game)
         .get(:game_instance)
+
+      with(:game_object)
+        .instanciate(ScoreBoard)
+        .get(:score_board_object)
+
+      with(:score_board_object)
+        .call(:publish)
 
       finish_with(:game_instance) 
     end
@@ -68,8 +86,24 @@ Games::Service
   .run(:create)
 ```
 
-
 # Future development
 
- .run_in_background() 
- .run_in_parallel()
+ - Run in background mode
+
+ ```.run_in_background(:method)``` 
+ 
+ - Run sevreral methods in paralell 
+
+ ```.run_in_parallel(:method_a, :method_b)```
+
+ - Make service objects subscribe to messaages
+
+ module Game
+  class Service < Odsl:Dsl
+    include Crud
+
+    subscribe 'start_game', to: :create
+    subscribe 'end_game', to: end_game
+  end
+end
+```
