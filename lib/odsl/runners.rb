@@ -44,7 +44,7 @@ module Odsl
         _finish_result
       rescue Odsl::LockError
         raise
-      rescue => e
+      rescue
         raise
       ensure
         @_current_lock&.unlock rescue nil
