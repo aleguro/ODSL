@@ -7,5 +7,6 @@ require "odsl/adapters/active_job"
 require "odsl/audit/serializer"
 require "odsl/audit/execution_context"
 require "odsl/audit/step_record"
+require "odsl/locking/lock_handle"
 require "odsl/dsl"
 require "odsl/railtie" if defined?(Rails::Railtie)

@@ -44,6 +44,10 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     rake (13.2.1)
+    redis-client (0.31.0)
+      connection_pool
+    redlock (2.1.0)
+      redis-client (>= 0.14.1, < 1.0.0)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     sqlite3 (2.9.6)
@@ -64,6 +68,7 @@ DEPENDENCIES
   minitest-reporters (>= 1.1)
   odsl!
   rake
+  redlock (>= 1.3)
   sqlite3 (>= 1.7)
 
 BUNDLED WITH

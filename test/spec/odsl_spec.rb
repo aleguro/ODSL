@@ -132,4 +132,30 @@ describe Odsl do
     assert_equal 'alejandro', game_instance.game.player
     assert_equal 'chess', game_instance.game.game_type
   end
+
+  it "lock() is a no-op when lock_redis_url is not configured" do
+    klass = Class.new(Odsl::Dsl) do
+      def test_lock
+        lock(:player)
+        finish_with(:player)
+      end
+    end
+
+    instance = klass.new(player: { name: 'alejandro' })
+    # Should not raise — no redis_url configured, lock is a no-op
+    result = instance.run(:test_lock)
+    assert_equal [{ name: 'alejandro' }], result
+  end
+
+  it "lock() raises LockError when lock cannot be acquired" do
+    klass = Class.new(Odsl::Dsl) do
+      def failing_lock
+        raise Odsl::LockError, "test lock failure"
+      end
+    end
+
+    assert_raises(Odsl::LockError) do
+      klass.new.run(:failing_lock)
+    end
+  end
 end

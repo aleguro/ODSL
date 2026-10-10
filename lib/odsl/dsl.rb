@@ -92,6 +92,24 @@ module Odsl
       @finish_with = with
     end
 
+    def lock(*vars)
+      redis_url = Odsl.config.lock_redis_url
+      return unless redis_url
+
+      require "redlock"
+      require_relative "locking/lock_handle"
+
+      key_parts = [self.class.name] + vars.map { |v| instance_variable_get("@#{v}").to_s }
+      lock_key  = key_parts.join(":")
+      ttl       = Odsl.config.lock_ttl
+
+      client    = Redlock::Client.new([redis_url])
+      lock_info = client.lock(lock_key, ttl)
+      raise Odsl::LockError, "Could not acquire lock for key: #{lock_key}" unless lock_info
+
+      @_current_lock = Odsl::Locking::LockHandle.new(client, lock_info)
+    end
+
     alias make        call
     alias link        call
     alias set         call
