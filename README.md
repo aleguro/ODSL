@@ -1,4 +1,11 @@
-# Odsl &nbsp;·&nbsp; [![Gem Version](https://badge.fury.io/rb/odsl.svg)](https://badge.fury.io/rb/odsl) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+# Odsl
+
+[![Gem Version](https://badge.fury.io/rb/odsl.svg)](https://badge.fury.io/rb/odsl)
+[![CI](https://github.com/aleguro/ODSL/actions/workflows/ci.yml/badge.svg)](https://github.com/aleguro/ODSL/actions/workflows/ci.yml)
+[![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.1-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
+[![Maintainability](https://img.shields.io/badge/maintainability-A-brightgreen)](https://github.com/aleguro/ODSL)
+[![RubyGems MFA](https://img.shields.io/badge/rubygems%20MFA-enabled-green)](https://guides.rubygems.org/mfa-requirement-opt-in/)
 
 > **O**bject **D**SL — a fluent, chainable framework for writing service objects in Ruby that are easy to read, test, and extend.
 
@@ -340,14 +347,16 @@ end
 
 ## Contributing
 
-1. Fork the repo
-2. Create a feature branch
-3. Add tests (Minitest, `test/spec/`)
-4. Run `bundle exec rake test`
-5. Open a PR
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, code style, and the PR checklist.
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a full history of releases.
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE.txt](LICENSE.txt).
