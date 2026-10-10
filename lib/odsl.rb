@@ -1,4 +1,7 @@
 require "odsl/version"
 require "odsl/errors"
 require "odsl/configuration"
+require "odsl/adapters/base"
+require "odsl/adapters/thread"
+require "odsl/adapters/active_job"
 require "odsl/dsl"
