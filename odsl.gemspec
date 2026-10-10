@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   - Decouple aspects from code ( background, paralelization )."
   spec.homepage = "https://github.com/aleguro/ODSL"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/aleguro/ODSL"
@@ -38,6 +38,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "minitest", ">= 5.8"
   spec.add_development_dependency "minitest-reporters", ">= 1.1"
+  spec.add_development_dependency "activerecord", ">= 7.0"
+  spec.add_development_dependency "sqlite3", ">= 1.7"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
