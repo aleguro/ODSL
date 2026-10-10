@@ -1,4 +1,6 @@
 # lib/odsl/runners.rb
+require "json"
+
 module Odsl
   module Runners
     def run(method, key: nil)
@@ -35,16 +37,22 @@ module Odsl
     end
 
     def _run_method(method, key: nil)
-      @_execution_context = nil
+      ctx_result          = _setup_context(method, key)
+      return nil if ctx_result == :already_completed
+
+      @_execution_context = ctx_result
       @_current_lock      = nil
       @_step_index        = 0
+      @_current_method    = method.to_s
 
       begin
         instance_eval(method.to_s)
+        @_execution_context&.update!(status: "completed")
         _finish_result
       rescue Odsl::LockError
         raise
       rescue
+        @_execution_context&.update!(status: "failed")
         raise
       ensure
         @_current_lock&.unlock rescue nil
@@ -59,6 +67,30 @@ module Odsl
       copy.instance_variable_set(:@with_attributes, nil)
       copy.instance_variable_set(:@finish_with,     nil)
       copy.send(:_run_method, method, key: key)
+    end
+
+    def _setup_context(method, key)
+      return nil unless key && defined?(Odsl::Audit::ExecutionContext)
+
+      ctx = Odsl::Audit::ExecutionContext.find_by(idempotency_key: key)
+
+      if ctx
+        return :already_completed if ctx.completed?
+        raise Odsl::AlreadyRunningError, "Job with key '#{key}' is already running" if ctx.running?
+      else
+        ttl = Odsl.config.audit_ttl
+        ctx = Odsl::Audit::ExecutionContext.create!(
+          idempotency_key: key,
+          service_class:   self.class.name,
+          method_name:     method.to_s,
+          kwargs:          JSON.generate(@kwargs),
+          status:          "pending",
+          expires_at:      ttl ? Time.now + ttl : nil
+        )
+      end
+
+      ctx.update!(status: "running")
+      ctx
     end
 
     def _finish_result
