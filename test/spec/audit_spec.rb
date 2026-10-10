@@ -224,3 +224,70 @@ describe "Resume" do
     assert_equal "completed", ctx.status
   end
 end
+
+describe "Cleanup" do
+  before do
+    Odsl.reset_config!
+    Odsl::Audit::StepRecord.delete_all
+    Odsl::Audit::ExecutionContext.delete_all
+  end
+
+  it "cleanup_expired! removes expired contexts and returns count" do
+    Odsl::Audit::ExecutionContext.create!(
+      idempotency_key: "expired-1",
+      service_class:   "Games::Service",
+      method_name:     "create",
+      kwargs:          "{}",
+      status:          "completed",
+      expires_at:      Time.now - 3600
+    )
+    Odsl::Audit::ExecutionContext.create!(
+      idempotency_key: "not-expired-1",
+      service_class:   "Games::Service",
+      method_name:     "create",
+      kwargs:          "{}",
+      status:          "completed",
+      expires_at:      Time.now + 3600
+    )
+    Odsl::Audit::ExecutionContext.create!(
+      idempotency_key: "no-ttl-1",
+      service_class:   "Games::Service",
+      method_name:     "create",
+      kwargs:          "{}",
+      status:          "completed",
+      expires_at:      nil
+    )
+
+    count = Odsl.cleanup_expired!
+
+    assert_equal 1, count
+    assert_equal 2, Odsl::Audit::ExecutionContext.count
+  end
+
+  it "cleanup_expired! returns 0 when nothing is expired" do
+    Odsl::Audit::ExecutionContext.create!(
+      idempotency_key: "future-1",
+      service_class:   "Games::Service",
+      method_name:     "create",
+      kwargs:          "{}",
+      status:          "completed",
+      expires_at:      Time.now + 3600
+    )
+
+    count = Odsl.cleanup_expired!
+    assert_equal 0, count
+    assert_equal 1, Odsl::Audit::ExecutionContext.count
+  end
+
+  it "audit_ttl config sets expires_at on new execution contexts" do
+    Odsl.configure { |c| c.audit_ttl = 3600 }
+
+    service = Games::Service.new(player: { name: "alejandro" }, game: "chess")
+    service.run(:create, key: "ttl-test-1")
+
+    ctx = Odsl::Audit::ExecutionContext.find_by!(idempotency_key: "ttl-test-1")
+    refute_nil ctx.expires_at
+    assert ctx.expires_at > Time.now
+    assert ctx.expires_at <= Time.now + 3601
+  end
+end

@@ -25,5 +25,12 @@ module Odsl
     def reset_config!
       CONFIG_MUTEX.synchronize { @config = Configuration.new }
     end
+
+    def cleanup_expired!
+      return 0 unless defined?(Odsl::Audit::ExecutionContext)
+      count = Odsl::Audit::ExecutionContext.expired.count
+      Odsl::Audit::ExecutionContext.expired.destroy_all
+      count
+    end
   end
 end
