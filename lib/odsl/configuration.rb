@@ -11,17 +11,19 @@ module Odsl
     end
   end
 
+  CONFIG_MUTEX = Mutex.new
+
   class << self
     def configure
-      yield(config)
+      yield(config) if block_given?
     end
 
     def config
-      @config ||= Configuration.new
+      CONFIG_MUTEX.synchronize { @config ||= Configuration.new }
     end
 
     def reset_config!
-      @config = Configuration.new
+      CONFIG_MUTEX.synchronize { @config = Configuration.new }
     end
   end
 end
