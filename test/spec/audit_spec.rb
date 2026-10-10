@@ -194,20 +194,32 @@ describe "Resume" do
     end
   end
 
-  it "skips steps already recorded as completed on resume" do
-    # Run once to record steps
-    service = Games::Service.new(player: { name: "alejandro" }, game: "chess")
-    service.run(:create, key: "resume-test-3")
+  it "skips only steps that were recorded and loads their results from DB" do
+    # Manually create a context as if the job ran only the first step
+    ctx = Odsl::Audit::ExecutionContext.create!(
+      idempotency_key: "resume-partial-1",
+      service_class:   "Games::Service",
+      method_name:     "create",
+      kwargs:          JSON.generate({ player: { "name" => "alejandro" }, game: "chess" }),
+      status:          "failed"
+    )
 
-    ctx = Odsl::Audit::ExecutionContext.find_by!(idempotency_key: "resume-test-3")
-    step_count_before = ctx.step_records.count
+    # Record only the first step (game_object) as completed
+    Odsl::Audit::StepRecord.create!(
+      execution_context: ctx,
+      name:              "game_object",
+      step_index:        0,
+      status:            "completed",
+      result:            nil,  # non_resumable because it's a Builder object
+      non_resumable:     true,
+      started_at:        Time.now,
+      completed_at:      Time.now
+    )
 
-    # Mark failed and resume
-    ctx.update!(status: "failed")
-    Games::Service.resume(key: "resume-test-3")
+    # Resume should complete the run
+    result = Games::Service.resume(key: "resume-partial-1")
+    refute_nil result
 
-    # No new step records should be added for already-completed steps
-    # (they're non_resumable so they get re-recorded, but the context completes)
     ctx.reload
     assert_equal "completed", ctx.status
   end

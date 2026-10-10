@@ -48,8 +48,10 @@ module Odsl
       def resume(key:)
         ctx = Odsl::Audit::ExecutionContext.find_by(idempotency_key: key)
         raise Odsl::ContextNotFoundError, "No execution context found for key: #{key}" unless ctx
+        raise Odsl::AlreadyRunningError, "Job with key '#{key}' is already running" if ctx.running?
+        return nil if ctx.completed?
 
-        kwargs  = ctx.kwargs_hash
+        kwargs   = ctx.kwargs_hash
         instance = new(**kwargs)
 
         completed_step_names = ctx.step_records
