@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "activerecord", ">= 7.0"
   spec.add_development_dependency "sqlite3", ">= 1.7"
   spec.add_development_dependency "redlock", ">= 1.3"
+  spec.add_development_dependency "railties", ">= 7.0"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
