@@ -22,10 +22,11 @@ module Odsl
 
       def self.serialize(value)
         case value
-        when Hash   then value.transform_keys(&:to_s).transform_values { |v| serialize(v) }
-        when Array  then value.map { |v| serialize(v) }
-        when Struct then serialize(value.to_h)
-        else             value
+        when Hash                                          then value.transform_keys(&:to_s).transform_values { |v| serialize(v) }
+        when Array                                         then value.map { |v| serialize(v) }
+        when Struct                                        then serialize(value.to_h)
+        when String, Numeric, TrueClass, FalseClass, NilClass then value
+        else raise TypeError, "Cannot serialize #{value.class}"
         end
       end
       private_class_method :serialize

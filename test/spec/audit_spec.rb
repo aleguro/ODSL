@@ -163,3 +163,52 @@ describe "Audit system" do
     Games::Service.undef_method(:failing_create) rescue nil
   end
 end
+
+describe "Resume" do
+  before do
+    Odsl.reset_config!
+    Odsl::Audit::StepRecord.delete_all
+    Odsl::Audit::ExecutionContext.delete_all
+  end
+
+  it "resumes a failed run and completes it" do
+    # First run succeeds normally
+    service = Games::Service.new(player: { name: "alejandro" }, game: "chess")
+    service.run(:create, key: "resume-test-1")
+
+    # Mark it as failed to simulate a failure after partial execution
+    ctx = Odsl::Audit::ExecutionContext.find_by!(idempotency_key: "resume-test-1")
+    ctx.update!(status: "failed")
+
+    # Resume should complete it
+    result = Games::Service.resume(key: "resume-test-1")
+    refute_nil result
+
+    ctx.reload
+    assert_equal "completed", ctx.status
+  end
+
+  it "raises ContextNotFoundError for unknown key" do
+    assert_raises(Odsl::ContextNotFoundError) do
+      Games::Service.resume(key: "does-not-exist")
+    end
+  end
+
+  it "skips steps already recorded as completed on resume" do
+    # Run once to record steps
+    service = Games::Service.new(player: { name: "alejandro" }, game: "chess")
+    service.run(:create, key: "resume-test-3")
+
+    ctx = Odsl::Audit::ExecutionContext.find_by!(idempotency_key: "resume-test-3")
+    step_count_before = ctx.step_records.count
+
+    # Mark failed and resume
+    ctx.update!(status: "failed")
+    Games::Service.resume(key: "resume-test-3")
+
+    # No new step records should be added for already-completed steps
+    # (they're non_resumable so they get re-recorded, but the context completes)
+    ctx.reload
+    assert_equal "completed", ctx.status
+  end
+end

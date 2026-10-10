@@ -16,8 +16,17 @@ module Odsl
     def to(*variables)
       variables.each_with_index do |variable, index|
         value = @last_results[index]
-        instance_variable_set("@#{variable}", value)
-        _record_step(variable, value)
+
+        if @_resuming_steps&.include?(variable.to_s)
+          stored = @_execution_context
+                     .step_records
+                     .find_by(name: variable.to_s)
+                     &.deserialized_result
+          instance_variable_set("@#{variable}", stored)
+        else
+          instance_variable_set("@#{variable}", value)
+          _record_step(variable, value)
+        end
       end
       self
     end

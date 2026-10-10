@@ -69,6 +69,27 @@ module Odsl
       copy.send(:_run_method, method, key: key)
     end
 
+    def _resume_method(method, key: nil)
+      @_execution_context = Odsl::Audit::ExecutionContext.find_by(idempotency_key: key)
+      @_current_lock      = nil
+      @_step_index        = @_execution_context.step_records.count
+      @_current_method    = method.to_s
+
+      @_execution_context.update!(status: "running")
+
+      begin
+        instance_eval(method.to_s)
+        @_execution_context.update!(status: "completed")
+        _finish_result
+      rescue
+        @_execution_context.update!(status: "failed")
+        raise
+      ensure
+        @_current_lock&.unlock rescue nil
+        @_current_lock = nil
+      end
+    end
+
     def _setup_context(method, key)
       return nil unless key && defined?(Odsl::Audit::ExecutionContext)
 
