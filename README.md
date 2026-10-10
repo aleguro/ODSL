@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/odsl.svg)](https://badge.fury.io/rb/odsl)
 [![CI](https://github.com/aleguro/ODSL/actions/workflows/ci.yml/badge.svg)](https://github.com/aleguro/ODSL/actions/workflows/ci.yml)
-[![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.1-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org)
+[![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.2-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
 [![Maintainability](https://img.shields.io/badge/maintainability-A-brightgreen)](https://github.com/aleguro/ODSL)
 [![RubyGems MFA](https://img.shields.io/badge/rubygems%20MFA-enabled-green)](https://guides.rubygems.org/mfa-requirement-opt-in/)
